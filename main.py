@@ -4,8 +4,8 @@ class Node:
         self.key = key
         self.value = value
 class NodeArray:
-    def __init__(self, arr=None, leftChild=None, rightChild=None):
-        self.arr : List[Node] = arr
+    def __init__(self, leftChild=None, rightChild=None):
+        self.arr : List[Node] = []
         self.leftChild : NodeArray = leftChild
         self.rightChild : NodeArray = rightChild
     def setArr(self, arr):
@@ -14,34 +14,39 @@ class NodeArray:
         self.leftChild = leftChild
     def setRightChild(self, rightChild):
         self.rightChild = rightChild
-    def push(self, node):
-        for x in range(len(self.arr)):
-
+    def isEmpty(self):
+        return len(self.arr) == 0
 
 
 def createTreeItem(key,val):
     return Node(key, val)
+def getKeyOfNode(node):
+    return node.key
 
 class TwoThreeFourTree:
+    def __init__(self):
+        self.root : NodeArray = NodeArray()
     def isEmpty(self):
-        return self.root is None or len(self.root) == 0
+        return len(self.root.arr) == 0
     def insertItem(self, node):
         currentNodes : NodeArray = self.root
-        while(currentNodes != None):
+        while(not currentNodes.isEmpty()):
             if currentNodes.arr[0].key > node.key:
                 if currentNodes.leftChild is not None:
                     currentNodes = currentNodes.leftChild
             elif currentNodes.arr[len(currentNodes.arr)-1].key < node.key:
                 if currentNodes.rightChild is not None:
                     currentNodes = currentNodes.rightChild
-        currentNodes.arr.append(node)
-        currentNodes.arr =
+        if len(currentNodes.arr) < 3:
+            currentNodes.arr.append(node)
+            currentNodes.arr.sort(key=getKeyOfNode)
 
 t = TwoThreeFourTree()
 print(t.isEmpty())
 print(t.insertItem(createTreeItem(8, 8)))
 print(t.insertItem(createTreeItem(5, 5)))
 print(t.insertItem(createTreeItem(10, 10)))
+print(t.root.key)
 #print(t.insertItem(createTreeItem(15, 15)))
 #print(t.isEmpty())
 #print(t.retrieveItem(5)[0])
