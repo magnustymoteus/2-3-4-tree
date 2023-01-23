@@ -4,18 +4,18 @@ class Node:
         self.key = key
         self.value = value
 class NodeArray:
-    def __init__(self, leftChild=None, rightChild=None):
+    def __init__(self, parent=None):
+        self.parent = parent
         self.arr : List[Node] = []
-        self.leftChild : NodeArray = leftChild
-        self.rightChild : NodeArray = rightChild
+        self.children : List[NodeArray] = []
     def setArr(self, arr):
         self.arr = arr
-    def setLeftChild(self, leftChild):
-        self.leftChild = leftChild
-    def setRightChild(self, rightChild):
-        self.rightChild = rightChild
+    def setChildren(self, children):
+        self.children = children
     def isEmpty(self):
         return len(self.arr) == 0
+    def hasEmptyChildren(self):
+        return len(self.children) == 0
 
 
 def createTreeItem(key,val):
@@ -30,38 +30,41 @@ class TwoThreeFourTree:
         return len(self.root.arr) == 0
     def retrieveItem(self, key):
         currentNodes = self.root
-        while(currentNodes is not None):
-            if currentNodes.arr[0].key > key:
-                if currentNodes.leftChild is not None:
-                    currentNodes = currentNodes.leftChild
-                else:
+        while not currentNodes.hasEmptyChildren():
+            if key < currentNodes.arr[0].key and currentNodes.children[0] is not None:
+                currentNodes = currentNodes.children[0]
+                break
+            elif key > currentNodes.arr[len(currentNodes.arr) - 1].key and currentNodes.children[
+                len(currentNodes.children) - 1] is not None:
+                currentNodes = currentNodes.children[len(currentNodes.children) - 1]
+                break
+            for x in range(len(currentNodes.arr) - 1):
+                if key > currentNodes.arr[x].key and key < currentNodes.arr[x + 1].key:
+                    currentNodes = currentNodes.children[x + 1]
                     break
-            elif currentNodes.arr[len(currentNodes.arr) - 1].key < key:
-                if currentNodes.rightChild is not None:
-                    currentNodes = currentNodes.rightChild
-                else:
-                    break
-            else:
-                for currentNode in currentNodes.arr:
-                    if currentNode.key == key:
-                        return (currentNode.value, True)
+        for currentNode in currentNodes.arr:
+            if key == currentNode.key:
+                return (currentNode.value, True)
         return (None, False)
     def insertItem(self, node):
         currentNodes = self.root
-        while(not currentNodes.isEmpty()):
-            if currentNodes.arr[0].key > node.key:
-                if currentNodes.leftChild is not None:
-                    currentNodes = currentNodes.leftChild
-                else:
+        while not currentNodes.hasEmptyChildren():
+            if node.key <= currentNodes.arr[0].key and currentNodes.children[0] is not None:
+                currentNodes = currentNodes.children[0]
+                break
+            elif node.key > currentNodes.arr[len(currentNodes.arr)-1].key and currentNodes.children[len(currentNodes.children)-1] is not None:
+                currentNodes = currentNodes.children[len(currentNodes.children)-1]
+                break
+            for x in range(len(currentNodes.arr)-1):
+                if node.key > currentNodes.arr[x].key and node.key <= currentNodes.arr[x+1].key:
+                    currentNodes = currentNodes.children[x+1]
                     break
-            elif currentNodes.arr[len(currentNodes.arr)-1].key < node.key:
-                if currentNodes.rightChild is not None:
-                    currentNodes = currentNodes.rightChild
-                else:
-                    break
+
         if len(currentNodes.arr) < 3:
             currentNodes.arr.append(node)
             currentNodes.arr.sort(key=getKeyOfNode)
+        else:
+            pass
         return True
 
 
