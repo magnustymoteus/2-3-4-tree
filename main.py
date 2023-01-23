@@ -34,9 +34,13 @@ class TwoThreeFourTree:
             if currentNodes.arr[0].key > node.key:
                 if currentNodes.leftChild is not None:
                     currentNodes = currentNodes.leftChild
+                else:
+                    break
             elif currentNodes.arr[len(currentNodes.arr)-1].key < node.key:
                 if currentNodes.rightChild is not None:
                     currentNodes = currentNodes.rightChild
+                else:
+                    break
         if len(currentNodes.arr) < 3:
             currentNodes.arr.append(node)
             currentNodes.arr.sort(key=getKeyOfNode)
@@ -46,7 +50,6 @@ print(t.isEmpty())
 print(t.insertItem(createTreeItem(8, 8)))
 print(t.insertItem(createTreeItem(5, 5)))
 print(t.insertItem(createTreeItem(10, 10)))
-print(t.root.key)
 #print(t.insertItem(createTreeItem(15, 15)))
 #print(t.isEmpty())
 #print(t.retrieveItem(5)[0])
