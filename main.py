@@ -140,7 +140,8 @@ class TwoThreeFourTree:
                 childNode = NodeArray(None, currentNode)
                 currentNode.children.append(childNode)
                 self.load(child, childNode)
-
+    def deleteItem(self, key):
+        pass
 
 
 
