@@ -12,9 +12,14 @@ class NodeArray:
         for currentNode in self.arr:
             print(f"'{currentNode.key}'", end=" ")
         print()
+    def getArrayOfKeys(self):
+        arr = []
+        for node in self.arr:
+            arr.append(node.key)
+        return arr
     def setArr(self, arr):
         self.arr = arr
-    def push(self, Node):
+    def push(self, Node : Node):
         self.arr.append(Node)
         self.arr.sort(key=getKeyOfNode)
     def setChildren(self, children):
@@ -109,6 +114,35 @@ class TwoThreeFourTree:
                 break
         currentNodes.push(node)
         return True
+    def save(self, currentNode=None):
+        if currentNode is None:
+            currentNode = self.root
+        elif currentNode.isEmpty():
+            return
+        currentStr = "{'root': "+str(currentNode.getArrayOfKeys())
+        if not currentNode.hasEmptyChildren():
+            currentStr += ",'children':["
+            for child in currentNode.children:
+                currentStr += self.save(child)+","
+            currentStr = currentStr[:-1]
+            currentStr += "]"
+        currentStr += "}"
+        return currentStr
+    def load(self, dict, currentNode : NodeArray = None):
+        if currentNode is None:
+            currentNode = NodeArray([])
+            self.root = currentNode
+        for key in dict.get('root'):
+            newNode = Node(key, key)
+            currentNode.arr.append(newNode)
+        if "children" in dict:
+            for child in dict.get("children"):
+                childNode = NodeArray(None, currentNode)
+                currentNode.children.append(childNode)
+                self.load(child, childNode)
+
+
+
 
 
 t = TwoThreeFourTree()
@@ -121,9 +155,9 @@ print(t.isEmpty())
 print(t.retrieveItem(5)[0])
 print(t.retrieveItem(5)[1])
 t.inorderTraverse(print)
-#print(t.save())
-#t.load({'root': [10], 'children': [{'root': [5]}, {'root': [11]}]})
-#t.insertItem(createTreeItem(15, 15))
+print(t.save())
+t.load({'root': [10], 'children': [{'root': [5]}, {'root': [11]}]})
+t.insertItem(createTreeItem(15, 15))
 #print(t.deleteItem(0))
 #print(t.save())
 #print(t.deleteItem(10))
