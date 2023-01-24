@@ -32,7 +32,8 @@ class NodeArray:
     def split(self):
         newNodes = NodeArray([self.arr[1]], self.parent)
         self.arr.pop(1)
-        self.parent.children.append(newNodes)
+        index = self.parent.children.index(self)
+        self.parent.children.insert(index+1, newNodes)
 
 
 def createTreeItem(key,val):
@@ -63,14 +64,17 @@ class TwoThreeFourTree:
             if key == currentNode.key:
                 return (currentNode.value, True)
         return (None, False)
-    '''def inorderTraverse(self, func, end=False, currentNode=None):
-        if end == True:
-            return
+    def inorderTraverse(self, func, currentNode=None):
         if currentNode is None:
             currentNode = self.root
-        isEnd = True if currentNode.hasEmptyChildren() else False
-        self.inorderTraverse(func, isEnd, currentNode.children[0])
-        for x in range(len())'''
+        elif currentNode.isEmpty():
+            return
+        for x in range(len(currentNode.arr)):
+            if not currentNode.hasEmptyChildren():
+                self.inorderTraverse(func, currentNode.children[x])
+            func(currentNode.arr[x].key)
+        if not currentNode.hasEmptyChildren():
+            self.inorderTraverse(func, currentNode.children[len(currentNode.children)-1])
     def insertItem(self, node):
         currentNodes = self.root
         while not currentNodes.isEmpty():
@@ -91,16 +95,16 @@ class TwoThreeFourTree:
                     self.root.children[1].setChildren([currentNodes.children[2], currentNodes.children[3]])
                 currentNodes = self.root if isRoot else currentNodes.parent
             if not currentNodes.hasEmptyChildren():
-                if node.key <= currentNodes.arr[0].key and currentNodes.children[0] is not None:
+                if node.key < currentNodes.arr[0].key and currentNodes.children[0] is not None:
                     currentNodes = currentNodes.children[0]
-                    break
+                    continue
                 elif node.key > currentNodes.arr[len(currentNodes.arr)-1].key and currentNodes.children[len(currentNodes.children)-1] is not None:
                     currentNodes = currentNodes.children[len(currentNodes.children)-1]
-                    break
+                    continue
                 for x in range(len(currentNodes.arr)-1):
-                    if node.key > currentNodes.arr[x].key and node.key <= currentNodes.arr[x+1].key:
-                        currentNodes = currentNodes.children[x+1]
-                        break
+                    if currentNodes.arr[x].key < node.key < currentNodes.arr[x + 1].key:
+                        currentNodes = currentNodes.children[x + 1]
+                        continue
             else:
                 break
         currentNodes.push(node)
@@ -116,8 +120,7 @@ print(t.insertItem(createTreeItem(15, 15)))
 print(t.isEmpty())
 print(t.retrieveItem(5)[0])
 print(t.retrieveItem(5)[1])
-t.root.children[1].print()
-#t.inorderTraverse(print)
+t.inorderTraverse(print)
 #print(t.save())
 #t.load({'root': [10], 'children': [{'root': [5]}, {'root': [11]}]})
 #t.insertItem(createTreeItem(15, 15))
