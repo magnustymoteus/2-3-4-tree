@@ -29,6 +29,15 @@ class NodeArray:
         elif len(self.parent.children[index+1].arr) > 1:
             return self.parent.children[index + 1], True
         return None, False
+    def hasAll2NodeSiblings(self):
+        index = self.getIndexOfChild(self.parent)
+        if index == 0 and self.parent.children[1].is2Node():
+            return self.parent.children[1], True
+        elif index == len(self.parent.children)-1 and self.parent.children[index-1].is2Node():
+            return self.parent.children[index-1], True
+        elif self.parent.children[index-1].is2Node() and self.parent.children[index+1].is2Node():
+            return self.parent.children[index-1], True
+        return None, False
     def has2NodeSibling(self):
         index = self.getIndexOfChild(self.parent)
         sibling = self.parent.children[0] if index > 0 else self.parent.children[1]
@@ -146,7 +155,7 @@ class TwoThreeFourTree:
                 break
         currentNodes.push(node)
         return True
-    def save(self, currentNode=None):
+    def save(self, currentNode : NodeArray =None):
         if currentNode is None:
             currentNode = self.root
         elif currentNode.isEmpty():
@@ -174,6 +183,7 @@ class TwoThreeFourTree:
                 self.load(child, childNode)
     def deleteItem(self, key):
         toBeDeletedResult = self.retrieveItem(key, True)
+        print(toBeDeletedResult)
         deletedNodes : NodeArray = toBeDeletedResult[0]
         foundNode = toBeDeletedResult[1]
         if not foundNode:
@@ -187,25 +197,50 @@ class TwoThreeFourTree:
             return True
         elif deletedNodes.is2Node():
             currentNodes = self.root
+            foundInLoop = False
             while not currentNodes.isEmpty():
                 if not currentNodes.isRoot() and currentNodes.is2Node():
                     if currentNodes.has3NodeOr4NodeSibling()[1]:
                         siblingNodes = currentNodes.has3NodeOr4NodeSibling()[0]
-                        indexOfChild = siblingNodes.getIndexOfChild(siblingNodes.parent)
-                        siblingNode = siblingNodes.arr[0]
-                        siblingNodes.arr.pop(0)
-                        parentNode = currentNodes.parent.arr[indexOfChild-1]
+                        indexOfSibling = siblingNodes.getIndexOfChild(siblingNodes.parent)
+                        indexOfCurrent = currentNodes.getIndexOfChild(currentNodes.parent)
+                        deletionIndex = 0 if indexOfSibling > indexOfCurrent else len(siblingNodes.arr)-1
+                        siblingNode = siblingNodes.arr[deletionIndex]
+                        siblingNodes.arr.pop(deletionIndex)
+                        parentNode = currentNodes.parent.arr[indexOfCurrent-1]
+                        currentNodes.parent.arr.pop(indexOfCurrent-1)
                         currentNodes.parent.push(siblingNode)
-                        currentNodes.parent.arr.pop(indexOfChild-1)
                         currentNodes.push(parentNode)
                     elif currentNodes.parent.is2Node() and currentNodes.has2NodeSibling()[1]:
-                        siblingNode = currentNodes.has2NodeSibling()[0].arr[0]
+                        siblingNodes = currentNodes.has2NodeSibling()[0]
+                        siblingNode = siblingNodes.arr[0]
                         parentNode = currentNodes.parent.arr[0]
+                        indexOfCurrent = currentNodes.getIndexOfChild(currentNodes.parent)
+                        indexOfSibling = siblingNodes.getIndexOfChild(siblingNodes.parent)
                         self.root = NodeArray()
                         self.root.push(currentNodes.arr[0])
                         self.root.push(parentNode)
                         self.root.push(siblingNode)
+                        if indexOfSibling < indexOfCurrent:
+                            self.root.setChildren(siblingNodes.children+currentNodes.children)
+                        else:
+                            self.root.setChildren(currentNodes.children+siblingNodes.children)
                         currentNodes = self.root
+                    elif currentNodes.hasAll2NodeSiblings()[1] and (currentNodes.parent.is3Node() or currentNodes.parent.is4Node()):
+                        print(f'case-3 | current-node: {currentNodes.arr[0].key}')
+                        siblingNodes = currentNodes.hasAll2NodeSiblings()[0]
+                        indexOfSibling = siblingNodes.getIndexOfChild(siblingNodes.parent)
+                        indexOfCurrent = currentNodes.getIndexOfChild(currentNodes.parent)
+                        parentNode = currentNodes.parent.arr[indexOfCurrent-1]
+                        currentNodes.parent.arr.pop(indexOfCurrent-1)
+                        currentNodes.parent.children.pop(indexOfSibling)
+                        currentNodes.push(parentNode)
+                        currentNodes.push(siblingNodes.arr[0])
+                        if indexOfSibling < indexOfCurrent:
+                            currentNodes.setChildren(siblingNodes.children+currentNodes.children)
+                        else:
+                            currentNodes.setChildren(currentNodes.children+siblingNodes.children)
+                if foundInLoop:
                     break
                 if key < currentNodes.arr[0].key and currentNodes.children[0] is not None:
                     currentNodes = currentNodes.children[0]
@@ -217,61 +252,21 @@ class TwoThreeFourTree:
                 for x in range(len(currentNodes.arr) - 1):
                     if key > currentNodes.arr[x].key and key <= currentNodes.arr[x + 1].key:
                         currentNodes = currentNodes.children[x + 1]
-                        break
-                break
+                        foundInLoop = True
             currentNodes.arr.pop(currentNodes.getIndexOfKeyInNodes(key))
+            currentIndex = currentNodes.getIndexOfChild(currentNodes.parent)
+            if currentNodes.isEmpty() and not currentNodes.isRoot():
+                currentNodes.parent.children.pop(currentIndex)
         else:
             deletedNodes.arr.pop(deletedNodes.getIndexOfKeyInNodes(key))
         return True
 
 t = TwoThreeFourTree()
-t.insertItem(createTreeItem(1,1))
-t.insertItem(createTreeItem(2,2))
-t.insertItem(createTreeItem(3,3))
-t.insertItem(createTreeItem(4,4))
+t.load({'root': [2, 5], 'children': [{'root': [1]}, {'root': [3, 4]}, {'root': [12, 15]}]})
+t.insertItem(createTreeItem(10,10))
+t.insertItem(createTreeItem(13,13))
 print(t.save())
-t.deleteItem(4)
+t.deleteItem(3)
 print(t.save())
-print(t.deleteItem(3))
+t.deleteItem(5)
 print(t.save())
-t.insertItem(createTreeItem(3,3))
-t.insertItem(createTreeItem(4,4))
-print(t.save())
-t.deleteItem(1)
-print(t.save())
-'''print(t.isEmpty())
-print(t.insertItem(createTreeItem(8,8)))
-print(t.insertItem(createTreeItem(5,5)))
-print(t.insertItem(createTreeItem(10,10)))
-print(t.insertItem(createTreeItem(15,15)))
-print(t.isEmpty())
-print(t.retrieveItem(5)[0])
-print(t.retrieveItem(5)[1])
-t.inorderTraverse(print)
-print(t.save())
-t.load({'root': [10],'children':[{'root':[5]},{'root':[11]}]})
-t.insertItem(createTreeItem(15,15))
-print(t.deleteItem(0))
-print(t.save())
-print(t.deleteItem(10))
-print(t.save())'''
-
-'''
-True
-True
-True
-True
-True
-False
-5
-True
-5
-8
-10
-15
-{'root': [8],'children':[{'root':[5]},{'root':[10,15]}]}
-False
-{'root': [10],'children':[{'root':[5]},{'root':[11,15]}]}
-True
-{'root': [11],'children':[{'root':[5]},{'root':[15]}]}
-'''
