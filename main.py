@@ -32,6 +32,10 @@ class NodeArray:
         return len(self.children) == 0
     def is4Node(self):
         return len(self.arr) == 3
+    def is3Node(self):
+        return len(self.arr) == 2
+    def is2Node(self):
+        return len(self.arr) == 1
     def isRoot(self):
         return self.parent is None
     def split(self):
@@ -39,22 +43,23 @@ class NodeArray:
         self.arr.pop(1)
         index = self.parent.children.index(self)
         self.parent.children.insert(index+1, newNodes)
+    def getIndexOfKeyInNodes(self, key):
+        for x in range(len(self.arr)):
+            if self.arr[x].key == key:
+                return x
+
+    def findNodeSuccessor(self, key):
+        index = self.getIndexOfKeyInNodes(key)
+        currentNode = self.children[index + 1]
+        while not currentNode.hasEmptyChildren():
+            currentNode = currentNode.children[0]
+        return currentNode
 
 
 def createTreeItem(key,val):
     return Node(key, val)
 def getKeyOfNode(node):
     return node.key
-def getIndexOfKeyInNodes(nodes : NodeArray, key):
-    for x in range(len(nodes.arr)):
-        if nodes.arr[x].key == key:
-            return x
-def findNodeSuccessor(nodes : NodeArray, key):
-    index = getIndexOfKeyInNodes(nodes, key)
-    currentNode = nodes.children[index+1]
-    while not currentNode.hasEmptyChildren():
-        currentNode = currentNode.children[0]
-    return currentNode
 
 
 class TwoThreeFourTree:
@@ -72,7 +77,7 @@ class TwoThreeFourTree:
                 currentNodes = currentNodes.children[len(currentNodes.children)-1]
                 continue
             for x in range(len(currentNodes.arr)-1):
-                if key > currentNodes.arr[x].key and key <= currentNodes.arr[x+1].key:
+                if currentNodes.arr[x].key < key <= currentNodes.arr[x + 1].key:
                     currentNodes = currentNodes.children[x+1]
                     break
             break
@@ -159,21 +164,23 @@ class TwoThreeFourTree:
             return False
         else:
             if not deletedNodes.hasEmptyChildren():
-                successorNodes = findNodeSuccessor(deletedNodes, key)
+                successorNodes = deletedNodes.findNodeSuccessor(key)
                 successorNode = successorNodes.arr[0]
                 successorNodes.arr.pop(0)
-                indexOfDeletedNode = getIndexOfKeyInNodes(deletedNodes, key)
+                indexOfDeletedNode = deletedNodes.getIndexOfKeyInNodes(key)
                 deletedNodes.arr[indexOfDeletedNode] = successorNode
             else:
                 currentNodes = self.root
                 while not currentNodes.hasEmptyChildren():
+                    if not currentNodes.isRoot() and currentNodes.is2Node():
+                        pass
                     if key < currentNodes.arr[0].key and currentNodes.children[0] is not None:
                         currentNodes = currentNodes.children[0]
-                        break
+                        continue
                     elif key > currentNodes.arr[len(currentNodes.arr) - 1].key and currentNodes.children[
                         len(currentNodes.children) - 1] is not None:
                         currentNodes = currentNodes.children[len(currentNodes.children) - 1]
-                        break
+                        continue
                     for x in range(len(currentNodes.arr) - 1):
                         if key > currentNodes.arr[x].key and key <= currentNodes.arr[x + 1].key:
                             currentNodes = currentNodes.children[x + 1]
@@ -188,16 +195,17 @@ class TwoThreeFourTree:
 
 t = TwoThreeFourTree()
 print(t.isEmpty())
-print(t.insertItem(createTreeItem(8, 8)))
-print(t.insertItem(createTreeItem(5, 5)))
-print(t.insertItem(createTreeItem(10, 10)))
-print(t.insertItem(createTreeItem(15, 15)))
+print(t.insertItem(createTreeItem(8,8)))
+print(t.insertItem(createTreeItem(5,5)))
+print(t.insertItem(createTreeItem(10,10)))
+print(t.insertItem(createTreeItem(15,15)))
 print(t.isEmpty())
 print(t.retrieveItem(5)[0])
 print(t.retrieveItem(5)[1])
 t.inorderTraverse(print)
 print(t.save())
-t.insertItem(createTreeItem(15, 15))
+t.load({'root': [10],'children':[{'root':[5]},{'root':[11]}]})
+t.insertItem(createTreeItem(15,15))
 print(t.deleteItem(0))
 print(t.save())
 print(t.deleteItem(10))
