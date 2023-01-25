@@ -162,36 +162,32 @@ class TwoThreeFourTree:
         foundNode = toBeDeletedResult[1]
         if not foundNode:
             return False
+        if not deletedNodes.hasEmptyChildren():
+            successorNodes = deletedNodes.findNodeSuccessor(key)
+            successorNode = successorNodes.arr[0]
+            successorNodes.arr.pop(0)
+            indexOfDeletedNode = deletedNodes.getIndexOfKeyInNodes(key)
+            deletedNodes.arr[indexOfDeletedNode] = successorNode
+        elif deletedNodes.is2Node():
+            currentNodes = self.root
+            while not currentNodes.hasEmptyChildren():
+                if not currentNodes.isRoot() and currentNodes.is2Node():
+                    pass
+                if key < currentNodes.arr[0].key and currentNodes.children[0] is not None:
+                    currentNodes = currentNodes.children[0]
+                    continue
+                elif key > currentNodes.arr[len(currentNodes.arr) - 1].key and currentNodes.children[
+                    len(currentNodes.children) - 1] is not None:
+                    currentNodes = currentNodes.children[len(currentNodes.children) - 1]
+                    continue
+                for x in range(len(currentNodes.arr) - 1):
+                    if key > currentNodes.arr[x].key and key <= currentNodes.arr[x + 1].key:
+                        currentNodes = currentNodes.children[x + 1]
+                        break
+                break
         else:
-            if not deletedNodes.hasEmptyChildren():
-                successorNodes = deletedNodes.findNodeSuccessor(key)
-                successorNode = successorNodes.arr[0]
-                successorNodes.arr.pop(0)
-                indexOfDeletedNode = deletedNodes.getIndexOfKeyInNodes(key)
-                deletedNodes.arr[indexOfDeletedNode] = successorNode
-            else:
-                currentNodes = self.root
-                while not currentNodes.hasEmptyChildren():
-                    if not currentNodes.isRoot() and currentNodes.is2Node():
-                        pass
-                    if key < currentNodes.arr[0].key and currentNodes.children[0] is not None:
-                        currentNodes = currentNodes.children[0]
-                        continue
-                    elif key > currentNodes.arr[len(currentNodes.arr) - 1].key and currentNodes.children[
-                        len(currentNodes.children) - 1] is not None:
-                        currentNodes = currentNodes.children[len(currentNodes.children) - 1]
-                        continue
-                    for x in range(len(currentNodes.arr) - 1):
-                        if key > currentNodes.arr[x].key and key <= currentNodes.arr[x + 1].key:
-                            currentNodes = currentNodes.children[x + 1]
-                            break
-                    break
+            deletedNodes.arr.pop(deletedNodes.getIndexOfKeyInNodes(key))
         return True
-
-
-
-
-
 
 t = TwoThreeFourTree()
 print(t.isEmpty())
