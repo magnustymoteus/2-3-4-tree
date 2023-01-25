@@ -174,6 +174,49 @@ class TwoThreeFourTree:
             currentStr += "]"
         currentStr += "}"
         return currentStr
+    def adjustNodeForDeletion(self, currentNodes : NodeArray):
+        if not currentNodes.isRoot() and currentNodes.is2Node():
+            if currentNodes.has3NodeOr4NodeSibling()[1]:
+                siblingNodes = currentNodes.has3NodeOr4NodeSibling()[0]
+                indexOfSibling = siblingNodes.getIndexOfChild(siblingNodes.parent)
+                indexOfCurrent = currentNodes.getIndexOfChild(currentNodes.parent)
+                deletionIndex = 0 if indexOfSibling > indexOfCurrent else len(siblingNodes.arr) - 1
+                siblingNode = siblingNodes.arr[deletionIndex]
+                siblingNodes.remove(deletionIndex)
+                parentNode = currentNodes.parent.arr[indexOfCurrent - 1]
+                currentNodes.parent.remove(indexOfCurrent - 1)
+                currentNodes.parent.push(siblingNode)
+                currentNodes.push(parentNode)
+            elif currentNodes.parent.is2Node() and currentNodes.has2NodeSibling()[1]:
+                siblingNodes = currentNodes.has2NodeSibling()[0]
+                siblingNode = siblingNodes.arr[0]
+                parentNode = currentNodes.parent.arr[0]
+                indexOfCurrent = currentNodes.getIndexOfChild(currentNodes.parent)
+                indexOfSibling = siblingNodes.getIndexOfChild(siblingNodes.parent)
+                self.root = NodeArray()
+                self.root.push(currentNodes.arr[0])
+                self.root.push(parentNode)
+                self.root.push(siblingNode)
+                if indexOfSibling < indexOfCurrent:
+                    self.root.setChildren(siblingNodes.children + currentNodes.children)
+                else:
+                    self.root.setChildren(currentNodes.children + siblingNodes.children)
+                return self.root
+            elif currentNodes.hasAll2NodeSiblings()[1] and (
+                    currentNodes.parent.is3Node() or currentNodes.parent.is4Node()):
+                siblingNodes = currentNodes.hasAll2NodeSiblings()[0]
+                indexOfSibling = siblingNodes.getIndexOfChild(siblingNodes.parent)
+                indexOfCurrent = currentNodes.getIndexOfChild(currentNodes.parent)
+                parentNode = currentNodes.parent.arr[indexOfCurrent - 1]
+                currentNodes.parent.remove(indexOfCurrent - 1)
+                currentNodes.parent.children.pop(indexOfSibling)
+                currentNodes.push(parentNode)
+                currentNodes.push(siblingNodes.arr[0])
+                if indexOfSibling < indexOfCurrent:
+                    currentNodes.setChildren(siblingNodes.children + currentNodes.children)
+                else:
+                    currentNodes.setChildren(currentNodes.children + siblingNodes.children)
+        return currentNodes
     def load(self, dict, currentNode : NodeArray = None):
         if currentNode is None:
             currentNode = NodeArray([])
@@ -203,46 +246,7 @@ class TwoThreeFourTree:
             currentNodes = self.root
             foundInLoop = False
             while not currentNodes.isEmpty():
-                if not currentNodes.isRoot() and currentNodes.is2Node():
-                    if currentNodes.has3NodeOr4NodeSibling()[1]:
-                        siblingNodes = currentNodes.has3NodeOr4NodeSibling()[0]
-                        indexOfSibling = siblingNodes.getIndexOfChild(siblingNodes.parent)
-                        indexOfCurrent = currentNodes.getIndexOfChild(currentNodes.parent)
-                        deletionIndex = 0 if indexOfSibling > indexOfCurrent else len(siblingNodes.arr)-1
-                        siblingNode = siblingNodes.arr[deletionIndex]
-                        siblingNodes.remove(deletionIndex)
-                        parentNode = currentNodes.parent.arr[indexOfCurrent-1]
-                        currentNodes.parent.remove(indexOfCurrent-1)
-                        currentNodes.parent.push(siblingNode)
-                        currentNodes.push(parentNode)
-                    elif currentNodes.parent.is2Node() and currentNodes.has2NodeSibling()[1]:
-                        siblingNodes = currentNodes.has2NodeSibling()[0]
-                        siblingNode = siblingNodes.arr[0]
-                        parentNode = currentNodes.parent.arr[0]
-                        indexOfCurrent = currentNodes.getIndexOfChild(currentNodes.parent)
-                        indexOfSibling = siblingNodes.getIndexOfChild(siblingNodes.parent)
-                        self.root = NodeArray()
-                        self.root.push(currentNodes.arr[0])
-                        self.root.push(parentNode)
-                        self.root.push(siblingNode)
-                        if indexOfSibling < indexOfCurrent:
-                            self.root.setChildren(siblingNodes.children+currentNodes.children)
-                        else:
-                            self.root.setChildren(currentNodes.children+siblingNodes.children)
-                        currentNodes = self.root
-                    elif currentNodes.hasAll2NodeSiblings()[1] and (currentNodes.parent.is3Node() or currentNodes.parent.is4Node()):
-                        siblingNodes = currentNodes.hasAll2NodeSiblings()[0]
-                        indexOfSibling = siblingNodes.getIndexOfChild(siblingNodes.parent)
-                        indexOfCurrent = currentNodes.getIndexOfChild(currentNodes.parent)
-                        parentNode = currentNodes.parent.arr[indexOfCurrent-1]
-                        currentNodes.parent.remove(indexOfCurrent-1)
-                        currentNodes.parent.children.pop(indexOfSibling)
-                        currentNodes.push(parentNode)
-                        currentNodes.push(siblingNodes.arr[0])
-                        if indexOfSibling < indexOfCurrent:
-                            currentNodes.setChildren(siblingNodes.children+currentNodes.children)
-                        else:
-                            currentNodes.setChildren(currentNodes.children+siblingNodes.children)
+                currentNodes = self.adjustNodeForDeletion(currentNodes)
                 if foundInLoop:
                     break
                 if key < currentNodes.arr[0].key and currentNodes.children[0] is not None:
